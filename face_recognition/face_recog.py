@@ -19,18 +19,19 @@ class FaceRecog():
         # Load sample pictures and learn how to recognize it.
         dirname = 'knowns'
         files = os.listdir(dirname)
-        print(files)
         for filename in files:
             name, ext = os.path.splitext(filename)
-            print(name)
             if ext == '.jpg':
-                self.known_face_names.append(name)
+                self.known_face_names.append(name) ### Maybe its right moving this into if below
                 pathname = os.path.join(dirname, filename)
                 img = face_recognition.load_image_file(pathname)
-                face_encoding = face_recognition.face_encodings(img)[0]
-                print('d')
-                print(face_encoding)
-                self.known_face_encodings.append(face_encoding)
+                face_encoding = face_recognition.face_encodings(img)
+                if len(face_encoding) > 0:
+                    face_encoding = face_encoding[0]
+                    self.known_face_encodings.append(face_encoding)
+                else:
+                    print("No faces found in this image! ", end='')
+                    print(name)              
 
         # Initialize some variables
         self.face_locations = []
@@ -61,7 +62,6 @@ class FaceRecog():
             for face_encoding in self.face_encodings:
                 # See if the face is a match for the known face(s)
                 distances = face_recognition.face_distance(self.known_face_encodings, face_encoding)
-                print(distances)
                 min_value = min(distances)
 
                 # tolerance: How much distance between faces to consider it a match. Lower is more strict.

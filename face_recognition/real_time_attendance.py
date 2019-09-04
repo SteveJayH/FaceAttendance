@@ -1,11 +1,10 @@
-# face_recog.py
-
 import face_recognition
 import cv2
 import camera
 import os
 import numpy as np
 import pandas as pd
+from PIL import ImageFont, ImageDraw, Image
 import time
 
 class FaceRecog():

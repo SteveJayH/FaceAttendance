@@ -5,6 +5,8 @@ import cv2
 import camera
 import os
 import numpy as np
+import pandas as pd
+import time
 
 class FaceRecog():
     def __init__(self):
@@ -30,8 +32,9 @@ class FaceRecog():
                     face_encoding = face_encoding[0]
                     self.known_face_encodings.append(face_encoding)
                 else:
-                    print("No faces found in this image! ", end='')
-                    print(name)              
+                    print("No faces found in this image! \"", end='')
+                    print(name, end='')
+                    print("\"")
 
         # Initialize some variables
         self.face_locations = []
@@ -63,14 +66,13 @@ class FaceRecog():
                 # See if the face is a match for the known face(s)
                 distances = face_recognition.face_distance(self.known_face_encodings, face_encoding)
                 min_value = min(distances)
-
                 # tolerance: How much distance between faces to consider it a match. Lower is more strict.
                 # 0.6 is typical best performance.
                 name = "Unknown"
                 if min_value < 0.6:
                     index = np.argmin(distances)
                     name = self.known_face_names[index]
-
+                print(self.known_face_names)
                 self.face_names.append(name)
 
         self.process_this_frame = not self.process_this_frame
@@ -100,22 +102,54 @@ class FaceRecog():
         # video stream.
         ret, jpg = cv2.imencode('.jpg', frame)
         return jpg.tobytes()
+    
+    def initializing_timestamp(self):
+        self.database = self.known_face_names
+        self.time_frame = pd.DataFrame(columns=['name', 'time'])
 
-
+    def initial_timestamp(self):
+        #Making an dataframe
+        for individual in self.face_names:
+            name_list = self.time_frame['name']
+            print(name_list)
+            if individual not in self.time_frame['name'].tolist():
+                now = time.localtime()
+                timestamp = "%04d-%02d-%02d %02d:%02d:%02d" % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
+                self.time_frame = self.time_frame.append(pd.DataFrame([[individual, timestamp]], columns=['name', 'time']), ignore_index=True)
+                #self.database = self.database.remove(individual)
+            
+                #print("All Checked!")
+            
 if __name__ == '__main__':
     face_recog = FaceRecog()
     print(face_recog.known_face_names)
+    face_recog.initializing_timestamp()
+
     while True:
         frame = face_recog.get_frame()
-
+        timestamp = face_recog.initial_timestamp()
         # show the frame
-        cv2.imshow("Frame", frame)
+        cv2.imshow("Attendance Check", frame)
         key = cv2.waitKey(1) & 0xFF
 
         # if the `q` key was pressed, break from the loop
         if key == ord("q"):
             break
 
+        if face_recog.time_frame['name'].tolist() == face_recog.known_face_names:
+            print("All Checked!")
+            break
+
     # do a bit of cleanup
     cv2.destroyAllWindows()
-    print('finish')
+
+    result_frame = face_recog.time_frame
+    print(result_frame)
+
+    writer = pd.ExcelWriter('CheckList.xlsx', engine='xlsxwriter')
+    result_frame.to_excel(writer, sheet_name='Sheet1')
+
+    worksheet = writer.sheets['Sheet1']
+    worksheet.set_column('B:C',20)
+
+    writer.close()

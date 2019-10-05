@@ -68,7 +68,7 @@ class FaceRecog():
                 # tolerance: How much distance between faces to consider it a match. Lower is more strict.
                 # 0.6 is typical best performance.
                 name = "Unknown"
-                if min_value < 0.6:
+                if min_value < 0.5:
                     index = np.argmin(distances)
                     name = self.known_face_names[index]
                 print(self.known_face_names)
@@ -110,11 +110,12 @@ class FaceRecog():
         #Making an dataframe
         for individual in self.face_names:
             name_list = self.time_frame['name']
-            print(name_list)
+            #sprint(name_list)
             if individual not in self.time_frame['name'].tolist():
                 now = time.localtime()
                 timestamp = "%04d-%02d-%02d %02d:%02d:%02d" % (now.tm_year, now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec)
-                self.time_frame = self.time_frame.append(pd.DataFrame([[individual, timestamp]], columns=['name', 'time']), ignore_index=True)
+                if individual is not 'Unknown':
+                    self.time_frame = self.time_frame.append(pd.DataFrame([[individual, timestamp]], columns=['name', 'time']), ignore_index=True)
                 #self.database = self.database.remove(individual)
             
                 #print("All Checked!")
@@ -135,7 +136,7 @@ if __name__ == '__main__':
         if key == ord("q"):
             break
 
-        if face_recog.time_frame['name'].tolist() == face_recog.known_face_names:
+        if face_recog.time_frame['name'].tolist() == face_recog.known_face_names or len(face_recog.time_frame['name'].tolist())>=len(face_recog.known_face_names):
             print("All Checked!")
             break
 

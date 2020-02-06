@@ -1,0 +1,7 @@
+Put images containing one face in this directory.
+
+.jpg is recommended but others also work.
+Code will automatically find a face in pictures at this directory.
+Each name of pictures go to the list of participants in the code. Name will also used at making excel(.csv) file..
+  So make sure, or you can edit codes that making excel part.
+Make sure there is only one face in a picture.

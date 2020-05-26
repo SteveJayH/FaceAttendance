@@ -2,5 +2,5 @@
 .gitattributes
 _config.yml
 
-/face_recognition/templates*
-/face_recognition/__pycache__*
+face_recognition/templates*
+face_recognition/__pycache__*
